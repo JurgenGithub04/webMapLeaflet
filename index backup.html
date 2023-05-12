@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+        integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+    <link rel="stylesheet" href="C:\Users\jurge\Desktop\Stellenbosch\2023(Hons)\Modules\GIT 713\Leaflet\leaflet-search-master\dist\leaflet-search.src.css"/>
+
+    <style>
+        body {
+            margin: 10%;
+            padding: 0%;
+            background-color: rgb(200, 229, 149);
+            background-size: cover;
+            background-position: center;
+        }
+
+        #map {
+            width: 80%;
+            height: 70vh;
+            margin: 0 auto;
+        }
+
+        #title {
+            color: #5A5A5A;
+            margin: 2%;
+            font-weight: bold;
+            text-align: center;
+            font-size: 30px;
+            font-family: 'Lucida Console';
+            border-style: inset;
+            border-color: coral;
+            background-color: aliceblue;
+            padding: 5%;
+        }
+
+        #info {
+            color: #5A5A5A;
+            margin: 2%;
+            text-align: center;
+            font-size: 20px;
+            font-family: 'Lucida Console';
+            border-style: solid;
+            border-color: rgb(117, 184, 240);
+            background-color: rgb(255, 255, 255);
+            padding: 1%;
+            display: none;
+        }
+
+        #filter-container {
+            border-style: solid;
+            border-color: rgb(27, 27, 27);
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.5rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+    </style>
+
+</head>
+
+<body>
+    
+    <div id='title'>Bot Garden Web Map</div>
+
+    <div id="filter-container">
+        <table>
+            <thead>
+              <tr>
+                <th>IUCN Red List</th>
+                <th>Plant Beds</th>
+                <th>Theme of Plant</th>
+              </tr>
+            </thead>
+            <tr>
+              <td><label><input type="checkbox" id="not-evaluated-checkbox" checked> Not Evaluated</label></td>
+              <td><label><input type="checkbox" id="plant-beds-checkbox" checked> Plant Beds</label></td>
+              <td><label><input type="checkbox" id="food-plants-checkbox" checked> Food Plants</label></td>
+            </tr>
+            <tr>
+              <td><label><input type="checkbox" id="extinct-in-wild-checkbox" checked> Extinct in the Wild</label></td>
+              <td></td>
+              <td><label><input type="checkbox" id="medicinal-plants-checkbox" checked> Medicinal Plants</label></td>
+            </tr>
+            <tr>
+              <td><label><input type="checkbox" id="least-concern-checkbox" checked> Least Concern</label></td>
+              <td></td>
+              <td><label><input type="checkbox" id="invasive-plants-checkbox" checked> Invasive Plants</label></td>
+            </tr>
+            <tr>
+              <td><label><input type="checkbox" id="near-threatened-checkbox" checked> Near Threatened</label></td>
+              <td></td>
+              <td><label><input type="checkbox" id="food-medicinal-checkbox" checked> Food and Medicinal</label></td>
+            </tr>
+            <tr>
+              <td><label><input type="checkbox" id="endangered-checkbox" checked> Endangered</label></td>
+              <td></td>
+              <td><label><input type="checkbox" id="food-invasive-checkbox" checked> Food and Invasive</label></td>
+            </tr>
+            <tr>
+              <td><label><input type="checkbox" id="vulnerable-checkbox" checked> Vulnerable</label></td>
+              <td></td>
+              <td><label><input type="checkbox" id="medicinal-invasive-checkbox" checked> Medicinal and Invasive</label></td>
+            </tr>
+            <tr>
+              <td><label><input type="checkbox" id="data-deficient-checkbox" checked> Data Deficient</label></td>
+              <td></td>
+              <td><label><input type="checkbox" id="all-themes-checkbox" checked> Food & Invasive & Medicinal</label></td>
+            </tr>
+            <tr>
+              <td><label><input type="checkbox" id="critically-indangered-checkbox" checked> Critically Endangered</label></td>
+              <td></td>
+              <td><label><input type="checkbox" id="select-all-checkbox-theme" checked> Select All</label></td>
+            </tr>
+            <tr>
+              <td >
+                <label><input type="checkbox" id="select-all-checkbox" checked> Select All</label>
+              </td>
+              <td></td>
+              <td></td>
+            </tr>
+          </table>
+          
+</div>
+
+    <div id='map'></div>
+
+    <div id="button-container">
+        <button id="location-button">Get My Location</button>
+        <button id="back-to-map-button">Back to Map</button>
+    </div>
+
+    <!--description of feature underneath the webMap-->
+    <div id="info"></div>
+</body>
+
+</html>
+
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+<script src="C:\Users\jurge\Desktop\Stellenbosch\2023(Hons)\Modules\GIT 713\Leaflet\polgon.js"></script>
+<script src="C:\Users\jurge\Desktop\Stellenbosch\2023(Hons)\Modules\GIT 713\Leaflet\Beds.js"></script>
+<script src="C:\Users\jurge\Desktop\Stellenbosch\2023(Hons)\Modules\GIT 713\Leaflet\bedSymbology.js"></script>
+<script src="C:\Users\jurge\Desktop\Stellenbosch\2023(Hons)\Modules\GIT 713\Leaflet\trees.js"></script>
+<script src='C:\Users\jurge\Desktop\Stellenbosch\2023(Hons)\Modules\GIT 713\Leaflet\background.js'></script>
+<script src='C:\Users\jurge\Desktop\Stellenbosch\2023(Hons)\Modules\GIT 713\Leaflet\species.js'></script>
+<script src="C:\Users\jurge\Desktop\Stellenbosch\2023(Hons)\Modules\GIT 713\Leaflet\leaflet-search-master\dist\leaflet-search.src.js"></script>
+
+<script>
+    
+const notEvaluatedCheckbox1 = document.getElementById('not-evaluated-checkbox');
+const extinctInWildCheckbox1 = document.getElementById('extinct-in-wild-checkbox');
+const leastConcernCheckbox = document.getElementById('least-concern-checkbox');
+const nearThreatenedCheckbox = document.getElementById('near-threatened-checkbox');
+const endangeredCheckbox = document.getElementById('endangered-checkbox');
+const vulnerableCheckbox = document.getElementById('vulnerable-checkbox');
+const dataDeficientCheckbox = document.getElementById('data-deficient-checkbox');
+const criticallyEndangeredCheckbox = document.getElementById('critically-indangered-checkbox');
+const selectAllCheckbox = document.getElementById('select-all-checkbox');
+
+const FoodCheckbox = document.getElementById('food-plants-checkbox');
+const MedCheckbox = document.getElementById('medicinal-plants-checkbox');
+const InvCheckbox = document.getElementById('invasive-plants-checkbox');
+const FoodMedCheckbox = document.getElementById('food-medicinal-checkbox');
+const FoodInvheckbox = document.getElementById('food-invasive-checkbox');
+const MedInvCheckbox = document.getElementById('medicinal-invasive-checkbox');
+const AllThemeCheckbox = document.getElementById('all-themes-checkbox');
+const ThemeselectAllCheckbox = document.getElementById('select-all-checkbox-theme');
+
+selectAllCheckbox.addEventListener('change', function() {
+  const isChecked = selectAllCheckbox.checked;
+  notEvaluatedCheckbox1.checked = isChecked;
+  extinctInWildCheckbox1.checked = isChecked;
+  leastConcernCheckbox.checked = isChecked;
+  nearThreatenedCheckbox.checked = isChecked;
+  endangeredCheckbox.checked = isChecked;
+  vulnerableCheckbox.checked = isChecked;
+  dataDeficientCheckbox.checked = isChecked;
+  criticallyEndangeredCheckbox.checked = isChecked;
+
+  if (isChecked) {
+    map.addLayer(overlays['Not evauated']);
+    map.addLayer(overlays['Extinct in the wild']);
+    map.addLayer(overlays['Near threatened']);
+    map.addLayer(overlays['Endangered']);
+    map.addLayer(overlays['Vulnerable']);
+    map.addLayer(overlays['Data deficient']);
+    map.addLayer(overlays['Critically endangered']);
+    map.addLayer(overlays['Least concern']);
+  } else {
+    map.removeLayer(overlays['Not evauated']);
+    map.removeLayer(overlays['Extinct in the wild']);
+    map.removeLayer(overlays['Near threatened']);
+    map.removeLayer(overlays['Endangered']);
+    map.removeLayer(overlays['Vulnerable']);
+    map.removeLayer(overlays['Data deficient']);
+    map.removeLayer(overlays['Critically endangered']);
+    map.removeLayer(overlays['Least concern']);
+  }
+});
+
+ThemeselectAllCheckbox.addEventListener('change', function() {
+  const isChecked = ThemeselectAllCheckbox.checked;
+  FoodCheckbox.checked = isChecked;
+  MedCheckbox.checked = isChecked;
+  InvCheckbox.checked = isChecked;
+  FoodMedCheckbox.checked = isChecked;
+  FoodInvheckbox.checked = isChecked;
+  MedInvCheckbox.checked = isChecked;
+  AllThemeCheckbox.checked = isChecked;
+
+  if (isChecked) {
+    map.addLayer(overlays['Food']);
+    map.addLayer(overlays['Medicinal']);
+    map.addLayer(overlays['Invasive']);
+    map.addLayer(overlays['Food & Invasive']);
+    map.addLayer(overlays['Food & Medicinal']);
+    map.addLayer(overlays['Medicinal & Invasive']);
+    map.addLayer(overlays['All Themes']);
+  } else {
+    map.removeLayer(overlays['Food']);
+    map.removeLayer(overlays['Medicinal']);
+    map.removeLayer(overlays['Invasive']);
+    map.removeLayer(overlays['Food & Invasive']);
+    map.removeLayer(overlays['Food & Medicinal']);
+    map.removeLayer(overlays['Medicinal & Invasive']);
+    map.removeLayer(overlays['All Themes']);
+  }
+});
+
+    //Garden Coordinates
+    var gardenlat = -33.9362
+    var gardenlong = 18.8648
+
+    //Map initialisation
+    var map = L.map('map').setView([gardenlat, gardenlong], 18);
+
+    var infoDiv = document.getElementById('info');
+
+
+    //See zoom level
+    L.control.scale().addTo(map);
+
+    //Basemap 
+
+    //tile provider
+    //https://leaflet-extras.github.io/leaflet-providers/preview/
+
+    //https://gis.stackexchange.com/questions/225098/using-google-maps-static-tiles-with-leaflet
+    googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        maxZoom: 25,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+    });
+
+    googleHybrid = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+        maxZoom: 25,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+    });
+
+    googleStreets.addTo(map);
+
+    //geojson
+
+    L.geoJSON(background, {
+        style: {
+            fillOpacity: 1,
+            opacity: 1,
+            fillColor: '#ffb6c1',
+            stroke: true,
+            weight: 1.5
+        }
+    }).addTo(map);
+
+    
+
+    var symbology = {
+  pointToLayer: function (feature, latlng) {
+    var fillColor;
+    if (feature.properties.Theme_Food === "Yes" && feature.properties.Theme_Inva !== "Yes" && feature.properties.Theme_Medi !== "Yes") {
+      fillColor = 'green'; // Theme_Food only
+    } else if (feature.properties.Theme_Inva === "Yes" && feature.properties.Theme_Food !== "Yes" && feature.properties.Theme_Medi !== "Yes") {
+      fillColor = 'red'; // Theme_Inva only
+    } else if (feature.properties.Theme_Medi === "Yes" && feature.properties.Theme_Food !== "Yes" && feature.properties.Theme_Inva !== "Yes") {
+      fillColor = 'blue'; // Theme_Medi only
+    } else {
+      fillColor = 'orange'; // Multiple themes
+    }
+    return L.circleMarker(latlng, {
+      radius: 2.5,
+      fillColor: fillColor,
+      fillOpacity: 1,
+      stroke: false
+    });
+  },
+  onEachFeature: function (feature, layer) {
+    layer.on({
+      mouseover: function (event) {
+        layer.bindPopup('<b>Endanger Status: </b>' + feature.properties.TaxonName).openPopup();
+      },
+      mouseout: function (event) {
+        layer.closePopup();
+      }
+    });
+    layer.on('click', function (e) {
+      var infoDiv = document.getElementById('info');
+      var theme = [];
+      if (feature.properties.Theme_Food === "Yes") {
+        theme.push("food");
+      }
+      if (feature.properties.Theme_Inva === "Yes") {
+        theme.push("invasive species");
+      }
+      if (feature.properties.Theme_Medi === "Yes") {
+        theme.push("medicinal");
+      }
+      var themeText = "none";
+      if (theme.length > 0) {
+        themeText = theme.join(", ");
+      }
+      infoDiv.textContent = 'Species name: ' + feature.properties.TaxonName + ' (IUCNRedList status = ' + feature.properties.IUCNRedLis + ')' + ', Theme: ' + themeText;
+      infoDiv.style.display = 'block';
+    });
+  }
+};
+//RedList
+var RedLisStatus_NE = L.geoJSON(species, {
+  filter: function (feature, layer) {
+    return feature.properties.IUCNRedLis === 'Not evaluated';
+  },
+  pointToLayer: symbology.pointToLayer,
+  onEachFeature: symbology.onEachFeature
+});
+
+    var dataDeficient = L.geoJSON(species, {
+        filter: function (feature, layer) {
+            return feature.properties.IUCNRedLis === 'Data deficient';
+        },
+        pointToLayer: symbology.pointToLayer,
+  onEachFeature: symbology.onEachFeature
+    });
+
+    var extinctInTheWild = L.geoJSON(species, {
+        filter: function (feature, layer) {
+            return feature.properties.IUCNRedLis === 'Extinct in the wild';
+        },
+        pointToLayer: symbology.pointToLayer,
+  onEachFeature: symbology.onEachFeature
+    });
+
+    var leastConcern = L.geoJSON(species, {
+        filter: function (feature, layer) {
+            return feature.properties.IUCNRedLis === 'Least concern';
+        },
+        pointToLayer: symbology.pointToLayer,
+  onEachFeature: symbology.onEachFeature
+    });
+
+    var nearThreatened = L.geoJSON(species, {
+        filter: function (feature, layer) {
+            return feature.properties.IUCNRedLis === 'Near threatened';
+        },
+        pointToLayer: symbology.pointToLayer,
+  onEachFeature: symbology.onEachFeature
+    });
+
+    var vulnerable = L.geoJSON(species, {
+        filter: function (feature, layer) {
+            return feature.properties.IUCNRedLis === 'Vulnerable';
+        },
+        pointToLayer: symbology.pointToLayer,
+  onEachFeature: symbology.onEachFeature
+    });
+
+    var endangered = L.geoJSON(species, {
+        filter: function (feature, layer) {
+            return feature.properties.IUCNRedLis === 'Endangered';
+        },
+        pointToLayer: symbology.pointToLayer,
+  onEachFeature: symbology.onEachFeature
+    });
+
+    var criticalEndangereded = L.geoJSON(species, {
+        filter: function (feature, layer) {
+            return feature.properties.IUCNRedLis === 'Critically endangered';
+        },
+        pointToLayer: symbology.pointToLayer,
+  onEachFeature: symbology.onEachFeature
+    });
+
+    //Themes
+    var foodplants = L.geoJSON(species, {
+    filter: function (feature, layer) {
+        return feature.properties.Theme_Food === 'Yes' && feature.properties.Theme_Inva !== "Yes" && feature.properties.Theme_Medi !== "Yes";
+    },
+    pointToLayer: symbology.pointToLayer,
+    onEachFeature: symbology.onEachFeature
+    });
+
+    var medicinalPlants = L.geoJSON(species, {
+    filter: function (feature, layer) {
+        return feature.properties.Theme_Medi === 'Yes' && feature.properties.Theme_Food !== "Yes" && feature.properties.Theme_Inva !== "Yes";
+    },
+    pointToLayer: symbology.pointToLayer,
+    onEachFeature: symbology.onEachFeature
+    });
+
+    var invasivePlants = L.geoJSON(species, {
+    filter: function (feature, layer) {
+        return feature.properties.Theme_Inva === 'Yes' && feature.properties.Theme_Food !== "Yes" && feature.properties.Theme_Medi !== "Yes";
+    },
+    pointToLayer: symbology.pointToLayer,
+    onEachFeature: symbology.onEachFeature
+    });
+
+    var foodMedicinal = L.geoJSON(species, {
+    filter: function (feature, layer) {
+        return (feature.properties.Theme_Food === 'Yes' && feature.properties.Theme_Medi === "Yes") || (feature.properties.Theme_Medi === 'Yes' && feature.properties.Theme_Food === "Yes");
+    },
+    pointToLayer: symbology.pointToLayer,
+    onEachFeature: symbology.onEachFeature
+    });
+
+    var foodInvasive = L.geoJSON(species, {
+    filter: function (feature, layer) {
+        return (feature.properties.Theme_Food === 'Yes' && feature.properties.Theme_Inva === "Yes") || (feature.properties.Theme_Inva === 'Yes' && feature.properties.Theme_Food === "Yes");
+    },
+    pointToLayer: symbology.pointToLayer,
+    onEachFeature: symbology.onEachFeature
+    });
+
+    var medicinalInvasive = L.geoJSON(species, {
+    filter: function (feature, layer) {
+        return (feature.properties.Theme_Medi === 'Yes' && feature.properties.Theme_Inva === "Yes") || (feature.properties.Theme_Inva === 'Yes' && feature.properties.Theme_Medi === "Yes");
+    },
+    pointToLayer: symbology.pointToLayer,
+    onEachFeature: symbology.onEachFeature
+    });
+
+
+    var allThemes = L.geoJSON(species, {
+    filter: function (feature, layer) {
+        return feature.properties.Theme_Food === 'Yes' && feature.properties.Theme_Medi === 'Yes' && feature.properties.Theme_Inva === 'Yes';
+    },
+    pointToLayer: symbology.pointToLayer,
+    onEachFeature: symbology.onEachFeature
+    });
+//RedList
+    var not_eval = L.layerGroup();
+    var Data_deficient = L.layerGroup();
+    var Endangered = L.layerGroup();
+    var Extinct_in_the_wild = L.layerGroup();
+    var Near_threatened = L.layerGroup();
+    var Least_concern = L.layerGroup();
+    var Vulnerable = L.layerGroup();
+    var critical = L.layerGroup();
+
+//Themes
+    var food= L.layerGroup();
+    var medicinal = L.layerGroup();
+    var invasive = L.layerGroup();
+    var foodinv = L.layerGroup();
+    var foodmed = L.layerGroup();
+    var medinv = L.layerGroup();
+    var allt = L.layerGroup();
+
+    //layercontroller
+    var baseLayers = {
+        'Google Street': googleStreets,
+        'Google Hybrid': googleHybrid
+    };
+
+    var overlays = {
+        'Plant Beds': L.geoJSON(Beds, {
+            onEachFeature: function (feature, layer) {
+                layer.bindPopup('<b>Bed name: </b>' + feature.properties.Display_name);
+            },
+            style: function (feature) {
+                var bedName = feature.properties.Display_name;
+
+                for (var j = 0; j < bedsym.length; j++) {
+                    var name = bedsym[j].name;
+
+                    if (bedName === name) {
+                        return {
+                            fillColor: bedsym[j].color,
+                            fillOpacity: 1,
+                            stroke: false
+                        };
+                    }
+                }
+
+                return {
+                    fillColor: '#000000',
+                    fillOpacity: 1,
+                    stroke: false
+                };
+            }
+        }),
+        //redlist
+        'Not evauated': not_eval,
+        'Extinct in the wild': Extinct_in_the_wild,
+        'Least concern': Least_concern,
+        'Near threatened': Near_threatened,
+        'Endangered': Endangered,
+        'Vulnerable': Vulnerable,
+        'Data deficient': Data_deficient,
+        'Critically endangered': critical,
+        
+        //Theme
+        'Food': food,
+        'Medicinal': medicinal,
+        'Invasive': invasive,
+        'Food & Invasive': foodinv,
+        'Food & Medicinal': foodmed,
+        'Medicinal & Invasive': medinv,
+        'All Themes': allt,
+    };
+    
+    // Add the 'Plant Beds' layer to the map by default
+    overlays['Plant Beds'].addTo(map);
+
+    // Add the 'Trees' layer to the map by default
+    //Redlist
+    overlays['Not evauated'].addTo(map);
+    overlays['Extinct in the wild'].addTo(map);
+    overlays['Least concern'].addTo(map);
+    overlays['Near threatened'].addTo(map);
+    overlays['Endangered'].addTo(map);
+    overlays['Vulnerable'].addTo(map);
+    overlays['Data deficient'].addTo(map);
+    overlays['Critically endangered'].addTo(map);
+
+    //Themes
+    overlays['Food'].addTo(map);
+    overlays['Medicinal'].addTo(map);
+    overlays['Invasive'].addTo(map);
+    overlays['Food & Invasive'].addTo(map);
+    overlays['Food & Medicinal'].addTo(map);
+    overlays['Medicinal & Invasive'].addTo(map);
+    overlays['All Themes'].addTo(map);
+    
+    // add event listeners to the checkboxes that toggle the visibility of the corresponding overlay
+    var plantBedsCheckbox = document.getElementById('plant-beds-checkbox');
+    plantBedsCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            overlays['Plant Beds'].addTo(map);
+        } else {
+            map.removeLayer(overlays['Plant Beds']);
+        }
+    });
+
+    //RedList
+    var notEvaluatedCheckbox = document.getElementById('not-evaluated-checkbox');
+    notEvaluatedCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            overlays['Not evauated'].addTo(map);
+        } else {
+            map.removeLayer(overlays['Not evauated']);
+        }
+    });
+
+    var extinctInWildCheckbox = document.getElementById('extinct-in-wild-checkbox');
+    extinctInWildCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            overlays['Extinct in the wild'].addTo(map);
+        } else {
+            map.removeLayer(overlays['Extinct in the wild']);
+        }
+    });
+
+    var extinctInWildCheckbox = document.getElementById('least-concern-checkbox');
+    extinctInWildCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            overlays['Least concern'].addTo(map);
+        } else {
+            map.removeLayer(overlays['Least concern']);
+        }
+    });
+
+    var extinctInWildCheckbox = document.getElementById('near-threatened-checkbox');
+    extinctInWildCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            overlays['Near threatened'].addTo(map);
+        } else {
+            map.removeLayer(overlays['Near threatened']);
+        }
+    });
+
+    var extinctInWildCheckbox = document.getElementById('endangered-checkbox');
+    extinctInWildCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            overlays['Endangered'].addTo(map);
+        } else {
+            map.removeLayer(overlays['Endangered']);
+        }
+    });
+
+    var extinctInWildCheckbox = document.getElementById('vulnerable-checkbox');
+    extinctInWildCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            overlays['Vulnerable'].addTo(map);
+        } else {
+            map.removeLayer(overlays['Vulnerable']);
+        }
+    });
+
+    var extinctInWildCheckbox = document.getElementById('data-deficient-checkbox');
+    extinctInWildCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            overlays['Data deficient'].addTo(map);
+        } else {
+            map.removeLayer(overlays['Data deficient']);
+        }
+    });
+
+    var extinctInWildCheckbox = document.getElementById('critically-indangered-checkbox');
+    extinctInWildCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            overlays['Critically endangered'].addTo(map);
+        } else {
+            map.removeLayer(overlays['Critically endangered']);
+        }
+    });
+
+    //Themes
+    var foodPlantsCheckbox = document.getElementById('food-plants-checkbox');
+        foodPlantsCheckbox.addEventListener('change', function () {
+    if (this.checked) {
+        overlays['Food'].addTo(map);
+    } else {
+        map.removeLayer(overlays['Food']);
+    }
+});
+
+    var medicinalPlantsCheckbox = document.getElementById('medicinal-plants-checkbox');
+        medicinalPlantsCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            overlays['Medicinal'].addTo(map);
+        } else {
+            map.removeLayer(overlays['Medicinal']);
+        }
+    });
+
+    var invasivePlantsCheckbox = document.getElementById('invasive-plants-checkbox');
+        invasivePlantsCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            overlays['Invasive'].addTo(map);
+        } else {
+            map.removeLayer(overlays['Invasive']);
+        }
+    });
+
+    var foodMedicinalCheckbox = document.getElementById('food-medicinal-checkbox');
+        foodMedicinalCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            overlays['Food & Medicinal'].addTo(map);
+        } else {
+            map.removeLayer(overlays['Food & Medicinal']);
+        }
+    });
+
+    var foodInvasiveCheckbox = document.getElementById('food-invasive-checkbox');
+        foodInvasiveCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            overlays['Food & Invasive'].addTo(map);
+        } else {
+            map.removeLayer(overlays['Food & Invasive']);
+        }
+    });
+
+    var medicinalInvasiveCheckbox = document.getElementById('medicinal-invasive-checkbox');
+        medicinalInvasiveCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            overlays['Medicinal & Invasive'].addTo(map);
+        } else {
+            map.removeLayer(overlays['Medicinal & Invasive']);
+        }
+    });
+
+    var allThemesCheckbox = document.getElementById('all-themes-checkbox');
+        allThemesCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            overlays['All Themes'].addTo(map);
+        } else {
+            map.removeLayer(overlays['All Themes']);
+        }
+    });
+
+
+    //Zoom levels check
+
+    function updateTreesOverlay() {
+        var zoomLevel = map.getZoom();
+        if (zoomLevel >= 19) {
+            //RedList
+            if (!not_eval.hasLayer(RedLisStatus_NE)) {
+                not_eval.addLayer(RedLisStatus_NE);
+            }
+            if (!Data_deficient.hasLayer(dataDeficient)) {
+                Data_deficient.addLayer(dataDeficient);
+            }
+            if (!Endangered.hasLayer(endangered)) {
+                Endangered.addLayer(endangered);
+            }
+            if (!Extinct_in_the_wild.hasLayer(extinctInTheWild)) {
+                Extinct_in_the_wild.addLayer(extinctInTheWild);
+            }
+            if (!Near_threatened.hasLayer(nearThreatened)) {
+                Near_threatened.addLayer(nearThreatened);
+            }
+            if (!Least_concern.hasLayer(leastConcern)) {
+                Least_concern.addLayer(leastConcern);
+            }
+            if (!Vulnerable.hasLayer(vulnerable)) {
+                Vulnerable.addLayer(vulnerable);
+            }
+            if (!critical.hasLayer(criticalEndangereded)) {
+                critical.addLayer(criticalEndangereded);
+            }
+            //Themes
+            if (!food.hasLayer(foodplants)) {
+                food.addLayer(foodplants);
+            }
+            if (!medicinal.hasLayer(medicinalPlants)) {
+                medicinal.addLayer(medicinalPlants);
+            }
+            if (!invasive.hasLayer(invasivePlants)) {
+                invasive.addLayer(invasivePlants);
+            }
+            if (!foodinv.hasLayer(foodInvasive)) {
+                foodinv.addLayer(foodInvasive);
+            }
+            if (!foodmed.hasLayer(foodMedicinal)) {
+                foodmed.addLayer(foodMedicinal);
+            }
+            if (!medinv.hasLayer(medicinalInvasive)) {
+                medinv.addLayer(medicinalInvasive);
+            }
+            if (!allt.hasLayer(allThemes)) {
+                allt.addLayer(allThemes);
+            }
+        } else {
+            //redlist
+            if (not_eval.hasLayer(RedLisStatus_NE)) {
+                not_eval.removeLayer(RedLisStatus_NE);
+            }
+            if (Data_deficient.hasLayer(dataDeficient)) {
+                Data_deficient.removeLayer(dataDeficient);
+            }
+            if (Endangered.hasLayer(endangered)) {
+                Endangered.removeLayer(endangered);
+            }
+            if (Extinct_in_the_wild.hasLayer(extinctInTheWild)) {
+                Extinct_in_the_wild.removeLayer(extinctInTheWild);
+            }
+            if (Near_threatened.hasLayer(nearThreatened)) {
+                Near_threatened.removeLayer(nearThreatened);
+            }
+            if (Least_concern.hasLayer(leastConcern)) {
+                Least_concern.removeLayer(leastConcern);
+            }
+            if (Vulnerable.hasLayer(vulnerable)) {
+                Vulnerable.removeLayer(vulnerable);
+            }
+            if (critical.hasLayer(criticalEndangereded)) {
+                critical.removeLayer(criticalEndangereded);
+            }
+            //themes
+            if (food.hasLayer(foodplants)) {
+                food.removeLayer(foodplants);
+            }
+            if (medicinal.hasLayer(medicinalPlants)) {
+                medicinal.removeLayer(medicinalPlants);
+            }
+            if (invasive.hasLayer(invasivePlants)) {
+                invasive.removeLayer(invasivePlants);
+            }
+            if (foodmed.hasLayer(foodMedicinal)) {
+                foodmed.removeLayer(foodMedicinal);
+            }
+            if (foodinv.hasLayer(foodInvasive)) {
+                foodinv.removeLayer(foodInvasive);
+            }
+            if (medinv.hasLayer(medicinalInvasive)) {
+                medinv.removeLayer(medicinalInvasive);
+            }
+            if (allt.hasLayer(allThemes)) {
+                allt.removeLayer(allThemes);
+            }
+        }
+    }
+
+    map.on('zoomend', updateTreesOverlay);
+
+    L.control.layers(baseLayers).addTo(map);
+
+    //north arrow
+    var north = L.control({ position: "topright" });
+    north.onAdd = function (map) {
+        var div = L.DomUtil.create("div", "info legend");
+        div.innerHTML = '<img src="pngtree-compass-png-image_2961664.jpg" style="width: 50px; height: 50px;">';
+        return div;
+    }
+    north.addTo(map);
+
+    var backButton = document.getElementById('back-to-map-button');
+
+    backButton.addEventListener('click', function () {
+        backToMap([gardenlat, gardenlong], 18);
+    });
+
+    function backToMap(coords, zoom) {
+        map.setView(coords, zoom);
+    }
+
+    //Geolocation
+
+    if (!navigator.geolocation) {
+        // Create message element and insert into DOM
+        var messageContainer = document.getElementById("message-container");
+        var message = document.createElement("p");
+        message.textContent = "Your browser doesn't support geolocation feature!";
+        messageContainer.appendChild(message);
+    } else {
+        // Add click event listener to button
+        document.getElementById("location-button").addEventListener("click", getLocation);
+    }
+
+    var marker, circle;
+
+    function getLocation() {
+        // Call getCurrentPosition with getPosition as callback
+        navigator.geolocation.getCurrentPosition(getPosition);
+    }
+
+    function getPosition(position) {
+        var lat = position.coords.latitude;
+        var long = position.coords.longitude;
+        var accuracy = position.coords.accuracy;
+
+        if (marker) {
+            map.removeLayer(marker);
+        }
+
+        if (circle) {
+            map.removeLayer(circle);
+        }
+
+        marker = L.marker([lat, long]);
+        circle = L.circle([lat, long], { radius: accuracy });
+
+        var featureGroup = L.featureGroup([marker, circle]).addTo(map);
+
+        map.fitBounds(featureGroup.getBounds());
+
+    }
+
+
+//Controll search
+const Searchsymbology = {
+  radius: 0,
+  fillColor: 'red',
+  fillOpacity: 0,
+  stroke: false,
+  color: 'black',
+  weight: 0
+};
+
+const speciesLayer = L.geoJSON(species, {
+  pointToLayer: function (feature, latlng) {
+    return L.circleMarker(latlng, Searchsymbology);
+  }
+});
+
+const searchControl = new L.Control.Search({
+  layer: speciesLayer,
+  propertyName: 'TaxonName',
+  moveToLocation: function () {},
+  marker: false // disable marker animation and circle marker
+});
+
+searchControl.on('search:locationfound', function (e) {
+  var feature = e.layer.feature;
+  var infoDiv = document.getElementById('info');
+  var theme = [];
+  if (feature.properties.Theme_Food === "Yes") {
+    theme.push("food");
+  }
+  if (feature.properties.Theme_Inva === "Yes") {
+    theme.push("invasive species");
+  }
+  if (feature.properties.Theme_Medi === "Yes") {
+    theme.push("medicinal");
+  }
+  var themeText = "none";
+  if (theme.length > 0) {
+    themeText = theme.join(", ");
+  }
+  infoDiv.textContent = 'Species name: ' + feature.properties.TaxonName + ' (IUCNRedList status = ' + feature.properties.IUCNRedLis + ')' + ', Theme: ' + themeText;
+  infoDiv.style.display = 'block';
+});
+
+map.addControl(searchControl);
+
+
+
+
+
+
+</script>
